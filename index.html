@@ -1,0 +1,160 @@
+```html
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Football AI</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: white;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 30px 20px;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #9ca3af;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: #151e2f;
+      border-radius: 16px;
+      padding: 25px;
+      margin-top: 20px;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    #status {
+      margin-top: 20px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>⚽ Football AI</h1>
+
+    <div class="subtitle">
+      Live Football Betting Analysis
+    </div>
+
+    <div class="card">
+
+      <h2>Live Matches</h2>
+
+      <button onclick="loadMatches()">
+        🔄 Αναζήτηση Live Αγώνων
+      </button>
+
+      <div id="status">
+        Πάτησε το κουμπί για αναζήτηση.
+      </div>
+
+      <div id="matches"></div>
+
+    </div>
+
+  </div>
+
+  <script>
+    async function loadMatches() {
+
+      const status = document.getElementById("status");
+      const matches = document.getElementById("matches");
+
+      status.textContent = "Φόρτωση live αγώνων...";
+      matches.innerHTML = "";
+
+      try {
+
+        const response = await fetch("/api/live");
+
+        if (!response.ok) {
+          throw new Error("API error");
+        }
+
+        const data = await response.json();
+
+        if (!data.response || data.response.length === 0) {
+
+          status.textContent =
+            "Δεν υπάρχουν live αγώνες αυτή τη στιγμή.";
+
+          return;
+        }
+
+        status.textContent =
+          `Βρέθηκαν ${data.response.length} live αγώνες.`;
+
+        data.response.forEach(match => {
+
+          const home = match.teams.home.name;
+          const away = match.teams.away.name;
+
+          const homeScore = match.goals.home ?? 0;
+          const awayScore = match.goals.away ?? 0;
+
+          const minute =
+            match.fixture.status.elapsed || 0;
+
+          const div = document.createElement("div");
+
+          div.className = "card";
+
+          div.innerHTML = `
+            <h3>${home} - ${away}</h3>
+
+            <p style="font-size:28px">
+              ${homeScore} : ${awayScore}
+            </p>
+
+            <p>${minute}'</p>
+          `;
+
+          matches.appendChild(div);
+
+        });
+
+      } catch (error) {
+
+        status.textContent =
+          "Δεν μπορέσαμε να φορτώσουμε τους αγώνες.";
+
+      }
+    }
+  </script>
+
+</body>
+</html>
+```
+  
